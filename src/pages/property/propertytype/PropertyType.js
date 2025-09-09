@@ -37,7 +37,7 @@ const PropertyType = () => {
   useEffect(() => {
     dispatch(getAllPropertytypes());
     if (propertyTypes) setLocalPropertyTypes(propertyTypes);
-  }, [dispatch, propertyTypes]);
+  }, [dispatch]);
 
   const handleView = (property) => {
     setSelectedProperty(property);
@@ -125,7 +125,10 @@ const PropertyType = () => {
         style={customModalStyles}
         contentLabel="View Type"
       >
-        <ViewPropertyType setIsView={setIsView} selectedProperty={selectedProperty} />
+        <ViewPropertyType
+          setIsView={setIsView}
+          selectedProperty={selectedProperty}
+        />
       </Modal>
 
       {/* Edit Property Modal */}
@@ -151,7 +154,10 @@ const PropertyType = () => {
         style={customModalStyles}
         contentLabel="Delete Type"
       >
-        <DeletePropertyType setIsDelete={setIsDelete} selectedProperty={selectedProperty} />
+        <DeletePropertyType
+          setIsDelete={setIsDelete}
+          selectedProperty={selectedProperty}
+        />
       </Modal>
 
       {/* Add Property Modal */}

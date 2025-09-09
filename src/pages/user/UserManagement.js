@@ -63,8 +63,7 @@ const UserManagement = () => {
 
     return (
       (user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.phone?.includes(searchQuery)) &&
+        user.email?.toLowerCase().includes(searchQuery.toLowerCase())) &&
       (filterDate
         ? new Date(createdAt).toISOString().split("T")[0] === filterDate
         : true)

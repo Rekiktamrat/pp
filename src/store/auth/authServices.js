@@ -27,8 +27,21 @@ const changeDarkMode = async (data) => {
   const response = await axios.put(`${base_url}/profile/darkmode`, data);
   return response.data;
 };
+// Change Password
+const changePassword = async (data) => {
+  const token = localStorage.getItem("token"); // 🔐 get token
+  const response = await axios.post(
+    `${base_url}/auth/change-password`,
+    data,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
+  return response.data;
+};
 
 const authService = {
+  changePassword,
   adminRegister,
   adminLogin,
   updateProfile,

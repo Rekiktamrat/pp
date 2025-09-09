@@ -1,6 +1,12 @@
 import React, { useState } from "react";
+import { useDispatch } from "react-redux";
 
-const EditPropertyType = ({ setIsEdit, selectedPropertyType, updateProperty }) => {
+const EditPropertyType = ({
+  setIsEdit,
+  selectedPropertyType,
+  updateProperty,
+}) => {
+  const dispatch = useDispatch();
   // Use selectedPropertyType to initialize state
   const [propertyTypeDetails, setPropertyTypeDetails] = useState({
     name: selectedPropertyType?.name || "",
@@ -22,7 +28,13 @@ const EditPropertyType = ({ setIsEdit, selectedPropertyType, updateProperty }) =
   const handleSubmit = (e) => {
     e.preventDefault();
     // Call parent function to update the property type in mock state
-    updateProperty(selectedPropertyType._id, propertyTypeDetails);
+    dispatch(updateProperty(selectedPropertyType._id, propertyTypeDetails))
+      .unwrap()
+      .then(() => {
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      });
     setIsEdit(false);
   };
 
@@ -50,29 +62,34 @@ const EditPropertyType = ({ setIsEdit, selectedPropertyType, updateProperty }) =
                 <label className="block text-sm font-medium">Field Name:</label>
                 <input
                   type="text"
-                  value={field.field_name}
+                  value={field.name}
                   onChange={(e) =>
-                    handleFieldChange(index, "field_name", e.target.value)
+                    handleFieldChange(index, "name", e.target.value)
                   }
                   className="border p-2 w-full rounded"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium">Field Type:</label>
+                <label
+                  className="block text-sm font-medium"
+                  onClick={() => console.log(field.type)}
+                >
+                  Field Type:
+                </label>
                 <select
-                  value={field.field_type}
+                  value={field.type}
                   onChange={(e) =>
-                    handleFieldChange(index, "field_type", e.target.value)
+                    handleFieldChange(index, "type", e.target.value)
                   }
                   className="border p-2 w-full rounded"
                   required
                 >
-                  <option value="number">Number</option>
-                  <option value="boolean">Boolean</option>
-                  <option value="text">Text</option>
-                  <option value="date">Date</option>
-                  <option value="select">Select</option>
+                  <option value="Number">Number</option>
+                  <option value="Boolean">Boolean</option>
+                  <option value="String">String</option>
+                  <option value="Date">Date</option>
+                  <option value="">Select</option>
                 </select>
               </div>
             </div>
