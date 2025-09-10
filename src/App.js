@@ -21,7 +21,7 @@ import SaleTransactions from "./pages/transaction/SaleTransactions";
 import Profile from "./pages/auth/Profile";
 import Communications from "./pages/Communications";
 import ChangePassword from "./pages/auth/ChangePassword";
-
+import Notifications from "./pages/Notifications";
 // Dashboard components
 import {
   Dashboard,
@@ -63,6 +63,7 @@ const App = () => {
           <Route path="communications" element={<Communications />} />
           <Route path="profile" element={<Profile />} />
           <Route path="change-password" element={<ChangePassword />} />
+          <Route path="notifications" element={<Notifications />} />
         </Route>
 
         {/* Redirect "/" to dashboard */}
