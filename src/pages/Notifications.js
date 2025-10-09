@@ -1,322 +1,203 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+	sendNotification,
+	sendAutomaticNotification,
+	getNotifications,
+	reset,
+} from "../store/notification/notificationSlice";
+import axios from "axios";
+import { base_url } from "../api/axiosConfig";
 
-const NotificationSystem = () => {
-  const [activeTab, setActiveTab] = useState('manual');
-  const [notificationType, setNotificationType] = useState('info');
-  const [users, setUsers] = useState([
-    { id: 1, name: 'John Doe', email: 'john@example.com', selected: false },
-    { id: 2, name: 'Jane Smith', email: 'jane@example.com', selected: false },
-    { id: 3, name: 'Robert Johnson', email: 'robert@example.com', selected: false },
-    { id: 4, name: 'Sarah Williams', email: 'sarah@example.com', selected: false },
-    { id: 5, name: 'Michael Brown', email: 'michael@example.com', selected: false },
-  ]);
-  const [notificationTitle, setNotificationTitle] = useState('');
-  const [notificationMessage, setNotificationMessage] = useState('');
-  const [scheduledTime, setScheduledTime] = useState('');
-  const [activeNotifications, setActiveNotifications] = useState([
-    { id: 1, type: 'info', title: 'System Update', message: 'Scheduled maintenance tonight at 2 AM', time: '2 hours ago', active: true },
-    { id: 2, type: 'success', title: 'New Feature', message: 'Check out our new dashboard features', time: '5 hours ago', active: true },
-    { id: 3, type: 'warning', title: 'Action Required', message: 'Please update your profile information', time: '1 day ago', active: true },
-  ]);
+const NotificationPage = () => {
+	const dispatch = useDispatch();
+	const { notifications, isLoading, isSuccess, isError, message } = useSelector((state) => state.notification);
+	const [tab, setTab] = useState("manual");
+	const [type, setType] = useState("info");
+	const [title, setTitle] = useState("");
+	const [msg, setMsg] = useState("");
+	const [schedule, setSchedule] = useState("");
+	const [selectedUsers, setSelectedUsers] = useState([]);
+	const [users, setUsers] = useState([]);
+	const [autoTitle, setAutoTitle] = useState("");
+	const [autoMsg, setAutoMsg] = useState("");
 
-  const toggleUserSelection = (id) => {
-    setUsers(users.map(user => 
-      user.id === id ? { ...user, selected: !user.selected } : user
-    ));
-  };
+	// Fetch users from backend (replace endpoint as needed)
+	useEffect(() => {
+		async function fetchUsers() {
+			try {
+				const token = localStorage.getItem("token");
+				const res = await axios.get(`${base_url}/admin/users`, {
+					headers: { Authorization: `Bearer ${token}` },
+				});
+				setUsers(res.data);
+			} catch (err) {
+				setUsers([]);
+			}
+		}
+		fetchUsers();
+	}, []);
 
-  const selectAllUsers = () => {
-    setUsers(users.map(user => ({ ...user, selected: true })));
-  };
+	// Fetch notifications from backend
+	useEffect(() => {
+		dispatch(getNotifications());
+		return () => { dispatch(reset()); };
+	}, [dispatch]);
 
-  const deselectAllUsers = () => {
-    setUsers(users.map(user => ({ ...user, selected: false })));
-  };
+	// Manual notification
+	const handleManualSend = () => {
+		if (!title || !msg || selectedUsers.length === 0) return;
+		dispatch(sendNotification({ type, title, message: msg, users: selectedUsers, scheduledTime: schedule }));
+	};
 
-  const sendNotification = () => {
-    if (!notificationTitle || !notificationMessage) {
-      alert('Please fill in title and message');
-      return;
-    }
-    
-    const selectedUsers = users.filter(user => user.selected);
-    if (selectedUsers.length === 0) {
-      alert('Please select at least one user');
-      return;
-    }
-    
-    // In a real app, this would send the notification to the backend
-    alert(`Notification sent to ${selectedUsers.length} users!`);
-    
-    // Reset form
-    setNotificationTitle('');
-    setNotificationMessage('');
-    setScheduledTime('');
-    deselectAllUsers();
-  };
+	// Automatic notification (custom)
+	const handleAutoSend = () => {
+		if (!autoTitle || !autoMsg) return;
+		dispatch(sendAutomaticNotification({ type: "info", title: autoTitle, message: autoMsg, users: "all" }));
+	};
 
-  const toggleNotificationActive = (id) => {
-    setActiveNotifications(activeNotifications.map(notification => 
-      notification.id === id ? { ...notification, active: !notification.active } : notification
-    ));
-  };
+	// Automatic notification (quick)
+	const handleQuickAuto = (quickType) => {
+		let quick = { type: "info", title: "", message: "", users: "all" };
+		if (quickType === "welcome") quick = { type: "success", title: "Welcome", message: "Welcome to our platform!", users: "all" };
+		if (quickType === "inactive") quick = { type: "warning", title: "Inactive Alert", message: "You haven't logged in recently.", users: "all" };
+		if (quickType === "promotion") quick = { type: "info", title: "Promotion", message: "Check out our latest offers!", users: "all" };
+		dispatch(sendAutomaticNotification(quick));
+	};
 
-  const getTypeColor = (type) => {
-    switch(type) {
-      case 'info': return 'bg-blue-100 text-blue-800';
-      case 'success': return 'bg-green-100 text-green-800';
-      case 'warning': return 'bg-yellow-100 text-yellow-800';
-      case 'error': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
+	// User selection
+	const toggleUser = (id) => {
+		setSelectedUsers((prev) => prev.includes(id) ? prev.filter((uid) => uid !== id) : [...prev, id]);
+	};
+	const selectAll = () => setSelectedUsers(users.map((u) => u._id));
+	const deselectAll = () => setSelectedUsers([]);
 
-  const getTypeIcon = (type) => {
-    switch(type) {
-      case 'info': return 'ℹ️';
-      case 'success': return '✅';
-      case 'warning': return '⚠️';
-      case 'error': return '❌';
-      default: return '📢';
-    }
-  };
+	// UI helpers
+	const typeColors = {
+		info: "bg-blue-100 text-blue-800",
+		success: "bg-green-100 text-green-800",
+		warning: "bg-yellow-100 text-yellow-800",
+		error: "bg-red-100 text-red-800",
+	};
 
-  return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-6xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800">Notification System</h1>
-          <p className="text-gray-600">Manage and send notifications to your users</p>
-        </div>
+	return (
+		<div className="min-h-screen bg-gray-50 p-8">
+			<div className="max-w-4xl mx-auto">
+				<h1 className="text-3xl font-bold mb-2 text-gray-800">Admin Notifications</h1>
+				<p className="mb-8 text-gray-600">Send manual or automatic notifications to users.</p>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - Notification Form */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <div className="flex border-b mb-6">
-                <button
-                  className={`py-2 px-4 font-medium ${activeTab === 'manual' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500'}`}
-                  onClick={() => setActiveTab('manual')}
-                >
-                  Manual Notification
-                </button>
-                <button
-                  className={`py-2 px-4 font-medium ${activeTab === 'active' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500'}`}
-                  onClick={() => setActiveTab('active')}
-                >
-                  Active Notifications
-                </button>
-              </div>
+				<div className="flex space-x-4 mb-6">
+					<button className={`px-4 py-2 rounded-t-lg font-medium ${tab === "manual" ? "bg-white shadow text-blue-600" : "bg-gray-100 text-gray-500"}`} onClick={() => setTab("manual")}>Manual</button>
+					<button className={`px-4 py-2 rounded-t-lg font-medium ${tab === "automatic" ? "bg-white shadow text-green-600" : "bg-gray-100 text-gray-500"}`} onClick={() => setTab("automatic")}>Automatic</button>
+					<button className={`px-4 py-2 rounded-t-lg font-medium ${tab === "active" ? "bg-white shadow text-purple-600" : "bg-gray-100 text-gray-500"}`} onClick={() => setTab("active")}>Active</button>
+				</div>
 
-              {activeTab === 'manual' ? (
-                <div>
-                  <div className="mb-6">
-                    <h2 className="text-xl font-semibold text-gray-800 mb-4">Create New Notification</h2>
-                    
-                    <div className="mb-4">
-                      <label className="block text-gray-700 mb-2">Notification Type</label>
-                      <div className="flex space-x-2">
-                        {['info', 'success', 'warning', 'error'].map(type => (
-                          <button
-                            key={type}
-                            className={`px-4 py-2 rounded-lg capitalize ${notificationType === type ? getTypeColor(type) : 'bg-gray-100 text-gray-700'}`}
-                            onClick={() => setNotificationType(type)}
-                          >
-                            {type}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
+				{/* Feedback */}
+				{(isLoading || isSuccess || isError) && (
+					<div className="mb-4">
+						{isLoading && <div className="text-blue-500">Sending...</div>}
+						{isSuccess && <div className="text-green-500">Notification sent!</div>}
+						{isError && <div className="text-red-500">Error: {message}</div>}
+					</div>
+				)}
 
-                    <div className="mb-4">
-                      <label className="block text-gray-700 mb-2">Title</label>
-                      <input
-                        type="text"
-                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        value={notificationTitle}
-                        onChange={(e) => setNotificationTitle(e.target.value)}
-                        placeholder="Enter notification title"
-                      />
-                    </div>
+				{/* Manual Notification Tab */}
+				{tab === "manual" && (
+					<div className="bg-white rounded-lg shadow p-6">
+						<h2 className="text-xl font-semibold mb-4 text-gray-800">Send Manual Notification</h2>
+						<div className="mb-4">
+							<label className="block mb-2 text-gray-700">Type</label>
+							<div className="flex space-x-2">
+								{Object.keys(typeColors).map((t) => (
+									<button key={t} className={`px-4 py-2 rounded capitalize ${type === t ? typeColors[t] : "bg-gray-100 text-gray-700"}`} onClick={() => setType(t)}>{t}</button>
+								))}
+							</div>
+						</div>
+						<div className="mb-4">
+							<label className="block mb-2 text-gray-700">Title</label>
+							<input type="text" className="w-full border px-4 py-2 rounded" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Notification title" />
+						</div>
+						<div className="mb-4">
+							<label className="block mb-2 text-gray-700">Message</label>
+							<textarea className="w-full border px-4 py-2 rounded" rows={3} value={msg} onChange={(e) => setMsg(e.target.value)} placeholder="Notification message" />
+						</div>
+						<div className="mb-4">
+							<label className="block mb-2 text-gray-700">Schedule (optional)</label>
+							<input type="datetime-local" className="w-full border px-4 py-2 rounded" value={schedule} onChange={(e) => setSchedule(e.target.value)} />
+						</div>
+						<div className="mb-4">
+							<div className="flex justify-between items-center mb-2">
+								<label className="block text-gray-700">Select Users</label>
+								<div className="space-x-2">
+									<button className="text-sm text-blue-600 hover:underline" onClick={selectAll}>All</button>
+									<button className="text-sm text-blue-600 hover:underline" onClick={deselectAll}>None</button>
+								</div>
+							</div>
+							<div className="border rounded divide-y max-h-40 overflow-y-auto">
+								{users.length === 0 ? (
+									<div className="p-2 text-gray-500">No users found.</div>
+								) : (
+									users.map((u) => (
+										<div key={u._id} className={`p-2 flex items-center cursor-pointer hover:bg-gray-50 ${selectedUsers.includes(u._id) ? "bg-blue-50" : ""}`} onClick={() => toggleUser(u._id)}>
+											<div className={`w-5 h-5 rounded-full border flex items-center justify-center mr-3 ${selectedUsers.includes(u._id) ? "bg-blue-500 border-blue-500" : "border-gray-300"}`}>{selectedUsers.includes(u._id) && <span className="text-white text-sm">✓</span>}</div>
+											<div>
+												<div className="font-medium">{u.name}</div>
+												<div className="text-sm text-gray-500">{u.email}</div>
+											</div>
+										</div>
+									))
+								)}
+							</div>
+						</div>
+						<button className="w-full bg-blue-600 text-white py-3 rounded font-medium hover:bg-blue-700" onClick={handleManualSend} disabled={isLoading}>Send Notification</button>
+					</div>
+				)}
 
-                    <div className="mb-4">
-                      <label className="block text-gray-700 mb-2">Message</label>
-                      <textarea
-                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        rows="3"
-                        value={notificationMessage}
-                        onChange={(e) => setNotificationMessage(e.target.value)}
-                        placeholder="Enter notification message"
-                      ></textarea>
-                    </div>
+				{/* Automatic Notification Tab */}
+				{tab === "automatic" && (
+					<div className="bg-white rounded-lg shadow p-6">
+						<h2 className="text-xl font-semibold mb-4 text-gray-800">Automatic Notifications</h2>
+						<div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+							<button className="w-full flex items-center justify-between p-3 border rounded-lg hover:bg-green-50" onClick={() => handleQuickAuto("welcome")} disabled={isLoading}><span>Welcome Message</span><span>👋</span></button>
+							<button className="w-full flex items-center justify-between p-3 border rounded-lg hover:bg-yellow-50" onClick={() => handleQuickAuto("inactive")} disabled={isLoading}><span>Notify Inactive</span><span>💤</span></button>
+							<button className="w-full flex items-center justify-between p-3 border rounded-lg hover:bg-blue-50" onClick={() => handleQuickAuto("promotion")} disabled={isLoading}><span>Promotion</span><span>🎉</span></button>
+						</div>
+						<div className="mb-4 border-t pt-4">
+							<h3 className="font-semibold mb-2 text-gray-700">Custom System Notification</h3>
+							<input type="text" className="w-full border px-4 py-2 rounded mb-2" value={autoTitle} onChange={(e) => setAutoTitle(e.target.value)} placeholder="Title" />
+							<textarea className="w-full border px-4 py-2 rounded mb-2" rows={2} value={autoMsg} onChange={(e) => setAutoMsg(e.target.value)} placeholder="Message" />
+							<button className="w-full bg-green-600 text-white py-2 rounded font-medium hover:bg-green-700" onClick={handleAutoSend} disabled={isLoading}>Send System Notification</button>
+						</div>
+					</div>
+				)}
 
-                    <div className="mb-6">
-                      <label className="block text-gray-700 mb-2">Schedule (optional)</label>
-                      <input
-                        type="datetime-local"
-                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        value={scheduledTime}
-                        onChange={(e) => setScheduledTime(e.target.value)}
-                      />
-                    </div>
-
-                    <div className="mb-4">
-                      <div className="flex justify-between items-center mb-2">
-                        <label className="block text-gray-700">Select Users</label>
-                        <div className="space-x-2">
-                          <button 
-                            className="text-sm text-blue-600 hover:underline"
-                            onClick={selectAllUsers}
-                          >
-                            Select All
-                          </button>
-                          <button 
-                            className="text-sm text-blue-600 hover:underline"
-                            onClick={deselectAllUsers}
-                          >
-                            Deselect All
-                          </button>
-                        </div>
-                      </div>
-                      
-                      <div className="border rounded-lg divide-y max-h-60 overflow-y-auto">
-                        {users.map(user => (
-                          <div 
-                            key={user.id} 
-                            className={`p-3 flex items-center cursor-pointer hover:bg-gray-50 ${user.selected ? 'bg-blue-50' : ''}`}
-                            onClick={() => toggleUserSelection(user.id)}
-                          >
-                            <div className={`w-5 h-5 rounded-full border flex items-center justify-center mr-3 ${user.selected ? 'bg-blue-500 border-blue-500' : 'border-gray-300'}`}>
-                              {user.selected && <span className="text-white text-sm">✓</span>}
-                            </div>
-                            <div>
-                              <div className="font-medium">{user.name}</div>
-                              <div className="text-sm text-gray-500">{user.email}</div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <button
-                      className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
-                      onClick={sendNotification}
-                    >
-                      Send Notification
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div>
-                  <h2 className="text-xl font-semibold text-gray-800 mb-4">Active Notifications</h2>
-                  <div className="space-y-4">
-                    {activeNotifications.map(notification => (
-                      <div key={notification.id} className="border rounded-lg p-4">
-                        <div className="flex justify-between items-start">
-                          <div className="flex items-start">
-                            <span className="text-xl mr-3">{getTypeIcon(notification.type)}</span>
-                            <div>
-                              <h3 className="font-medium">{notification.title}</h3>
-                              <p className="text-gray-600">{notification.message}</p>
-                              <p className="text-sm text-gray-500 mt-1">{notification.time}</p>
-                            </div>
-                          </div>
-                          <div className="flex items-center">
-                            <div className={`w-3 h-3 rounded-full mr-2 ${notification.active ? 'bg-green-500' : 'bg-gray-300'}`}></div>
-                            <button 
-                              className="text-gray-500 hover:text-gray-700"
-                              onClick={() => toggleNotificationActive(notification.id)}
-                            >
-                              {notification.active ? 'Disable' : 'Enable'}
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Right Column - Stats and Quick Actions */}
-          <div className="space-y-6">
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">Notification Stats</h2>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
-                  <div>
-                    <div className="text-2xl font-bold">128</div>
-                    <div className="text-gray-600">Sent Today</div>
-                  </div>
-                  <div className="text-3xl">📤</div>
-                </div>
-                <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-                  <div>
-                    <div className="text-2xl font-bold">94%</div>
-                    <div className="text-gray-600">Read Rate</div>
-                  </div>
-                  <div className="text-3xl">📊</div>
-                </div>
-                <div className="flex justify-between items-center p-3 bg-yellow-50 rounded-lg">
-                  <div>
-                    <div className="text-2xl font-bold">12</div>
-                    <div className="text-gray-600">Scheduled</div>
-                  </div>
-                  <div className="text-3xl">⏰</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">Quick Actions</h2>
-              <div className="space-y-3">
-                <button className="w-full flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50">
-                  <span>Send Welcome Message</span>
-                  <span>👋</span>
-                </button>
-                <button className="w-full flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50">
-                  <span>Notify Inactive Users</span>
-                  <span>💤</span>
-                </button>
-                <button className="w-full flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50">
-                  <span>Promotion Announcement</span>
-                  <span>🎉</span>
-                </button>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">Recent Activity</h2>
-              <div className="space-y-4">
-                <div className="flex items-start">
-                  <div className="bg-green-100 p-2 rounded-full mr-3">✅</div>
-                  <div>
-                    <p>Promotion sent to 256 users</p>
-                    <p className="text-sm text-gray-500">10 minutes ago</p>
-                  </div>
-                </div>
-                <div className="flex items-start">
-                  <div className="bg-blue-100 p-2 rounded-full mr-3">ℹ️</div>
-                  <div>
-                    <p>System update notification</p>
-                    <p className="text-sm text-gray-500">2 hours ago</p>
-                  </div>
-                </div>
-                <div className="flex items-start">
-                  <div className="bg-yellow-100 p-2 rounded-full mr-3">⚠️</div>
-                  <div>
-                    <p>Maintenance alert sent</p>
-                    <p className="text-sm text-gray-500">Yesterday</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+				{/* Active Notifications Tab */}
+				{tab === "active" && (
+					<div className="bg-white rounded-lg shadow p-6">
+						<h2 className="text-xl font-semibold mb-4 text-gray-800">Active Notifications</h2>
+						<div className="space-y-4">
+							{notifications.length === 0 ? (
+								<div className="p-2 text-gray-500">No notifications found.</div>
+							) : (
+								notifications.map((n) => (
+									<div key={n._id} className="border rounded-lg p-4">
+										<div className="flex items-start">
+											<span className="text-xl mr-3">{n.type === "success" ? "✅" : n.type === "warning" ? "⚠️" : n.type === "error" ? "❌" : "ℹ️"}</span>
+											<div>
+												<h3 className="font-medium">{n.title}</h3>
+												<p className="text-gray-600">{n.message}</p>
+												<p className="text-sm text-gray-500 mt-1">{new Date(n.createdAt).toLocaleString()}</p>
+											</div>
+										</div>
+									</div>
+								))
+							)}
+						</div>
+					</div>
+				)}
+			</div>
+		</div>
+	);
 };
 
-export default NotificationSystem;
+export default NotificationPage;

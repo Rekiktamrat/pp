@@ -3,7 +3,7 @@ import { FiEye, FiEdit2, FiTrash2 } from "react-icons/fi";
 import { useDispatch, useSelector } from "react-redux";
 import Modal from "react-modal";
 import { getAllProperties } from "../../../store/property/propertySlice";
-import ViewProperty from "./ViewProperty";
+import PropertyViewModal from "./PropertyViewModal";
 import EditProperty from "./EditProperty";
 import DeleteProperty from "./DeleteProperty";
 
@@ -165,10 +165,11 @@ const PropertyManagement = () => {
         onRequestClose={() => setIsView(false)}
         style={customModalStyles}
         contentLabel="View Property"
+        ariaHideApp={false}
       >
-        <ViewProperty
-          setIsView={setIsView}
-          selectedProperty={selectedProperty}
+        <PropertyViewModal
+          property={selectedProperty}
+          onClose={() => setIsView(false)}
         />
       </Modal>
 

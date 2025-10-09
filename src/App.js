@@ -76,57 +76,6 @@ const App = () => {
 
 export default App;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // import {
 //   BrowserRouter as Router,
 //   Routes,
@@ -149,6 +98,7 @@ export default App;
 // import SaleTransactions from "./pages/transaction/SaleTransactions";
 // import Profile from "./pages/auth/Profile";
 // import Communications from "./pages/Communications";
+// import Notifications from "./pages/Notifications";
 
 // import ChangePassword from "./pages/auth/ChangePassword";
 // import {
@@ -199,6 +149,7 @@ export default App;
 //           <Route path="communications" element={<Communications />} />
 //           <Route path="change-password" element={<ChangePassword />} />
 //           <Route path="profile" element={<Profile />} />
+//           <Route path="notifications" element={<Notifications />} />
 //         </Route>
 
 //         {/* Redirect "/" to dashboard instead of login */}

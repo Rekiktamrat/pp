@@ -1,8 +1,11 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { changePassword } from "../../store/auth/authSlices";
 
 const ChangePassword = () => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     currentPassword: "",
@@ -30,20 +33,15 @@ const ChangePassword = () => {
 
     try {
       setLoading(true);
-      const token = localStorage.getItem("token"); // 🔐 get JWT or session token
-      await axios.post(
-        "http://localhost:4884/api/v1/auth/change-password", // 👈 backend endpoint
-        {
-          currentPassword: formData.currentPassword,
-          newPassword: formData.newPassword,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+
+      await dispatch(changePassword(formData));
 
       setSuccess("Password changed successfully!");
-      setFormData({ currentPassword: "", newPassword: "", confirmPassword: "" });
+      setFormData({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
 
       setTimeout(() => navigate("/admin/profile"), 2000); // redirect after success
     } catch (err) {

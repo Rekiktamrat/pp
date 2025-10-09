@@ -15,13 +15,22 @@ const customModalStyles = {
     left: "50%",
     right: "auto",
     bottom: "auto",
-    marginRight: "-50%",
     transform: "translate(-50%, -50%)",
-    width: "50%",
+    width: "600px",
     maxHeight: "90vh",
     overflow: "auto",
+    borderRadius: "16px",
+    padding: "24px",
+    border: "none",
+    boxShadow: "0 8px 30px rgba(0,0,0,0.15)",
+  },
+  overlay: {
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // backdrop
+    backdropFilter: "blur(4px)", // nice blur effect
+    zIndex: 50,
   },
 };
+
 
 const UserManagement = () => {
   const dispatch = useDispatch();

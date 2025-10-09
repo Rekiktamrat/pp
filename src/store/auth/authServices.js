@@ -29,14 +29,22 @@ const changeDarkMode = async (data) => {
 };
 // Change Password
 const changePassword = async (data) => {
-  const token = localStorage.getItem("token"); // 🔐 get token
-  const response = await axios.post(
-    `${base_url}/auth/change-password`,
-    data,
-    {
-      headers: { Authorization: `Bearer ${token}` },
-    }
-  );
+  console.log(data);
+  const userData = await localStorage.getItem("admin");
+  const getTokenFromLocalStorage = userData ? JSON.parse(userData) : null;
+
+  console.log(userData);
+
+  const headers = {
+    Authorization: `Bearer ${
+      getTokenFromLocalStorage ? getTokenFromLocalStorage.token : ""
+    }`,
+  };
+
+  const response = await axios.put(`${base_url}/admin/update-password`, data, {
+    headers,
+    withCredentials: true,
+  });
   return response.data;
 };
 

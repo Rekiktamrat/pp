@@ -1,6 +1,7 @@
 import axios from "axios";
 import { base_url } from "../../api/axiosConfig";
 
+
 // Send manual notification
 const sendNotification = async (notificationData, token) => {
   const config = {
@@ -8,7 +9,18 @@ const sendNotification = async (notificationData, token) => {
       Authorization: `Bearer ${token}`,
     },
   };
-  const response = await axios.post(`${base_url}/notification/`);
+  const response = await axios.post(`${base_url}/notification/manual`, notificationData, config);
+  return response.data;
+};
+
+// Send automatic notification
+const sendAutomaticNotification = async (notificationData, token) => {
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+  const response = await axios.post(`${base_url}/notification/automatic`, notificationData, config);
   return response.data;
 };
 
@@ -23,8 +35,10 @@ const getNotifications = async (token) => {
   return response.data;
 };
 
+
 const notificationService = {
   sendNotification,
+  sendAutomaticNotification,
   getNotifications,
 };
 
