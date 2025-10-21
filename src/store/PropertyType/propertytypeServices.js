@@ -14,9 +14,23 @@ const deletePropertytype = async (id) => {
 };
 
 const editPropertytype = async (data) => {
+  const userData = await localStorage.getItem("admin");
+  const getTokenFromLocalStorage = userData ? JSON.parse(userData) : null;
+
+  console.log(getTokenFromLocalStorage);
+
+  const headers = {
+    Authorization: `Bearer ${
+      getTokenFromLocalStorage ? getTokenFromLocalStorage.token : ""
+    }`,
+  };
   const response = await axios.put(
     `${base_url}/property-type/edit-type/${data.id}`,
-    data.data
+    data.data,
+    {
+      headers,
+      withCredentials: true,
+    }
   );
   return response.data;
 };

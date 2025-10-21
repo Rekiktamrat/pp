@@ -1,17 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import notificationService from "./notificationServices";
-// Send automatic notification
-export const sendAutomaticNotification = createAsyncThunk(
-  "notification/sendAutomatic",
-  async (notificationData, thunkAPI) => {
-    try {
-      const token = thunkAPI.getState().auth.user.token;
-      return await notificationService.sendAutomaticNotification(notificationData, token);
-    } catch (error) {
-      return thunkAPI.rejectWithValue(error.response?.data || error.message);
-    }
-  }
-);
 
 // Send notification
 export const sendNotification = createAsyncThunk(
@@ -67,20 +55,6 @@ const notificationSlice = createSlice({
         state.notifications.push(action.payload);
       })
       .addCase(sendNotification.rejected, (state, action) => {
-        state.isLoading = false;
-        state.isError = true;
-        state.message = action.payload;
-      })
-      // Automatic notification
-      .addCase(sendAutomaticNotification.pending, (state) => {
-        state.isLoading = true;
-      })
-      .addCase(sendAutomaticNotification.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.isSuccess = true;
-        state.notifications.push(action.payload);
-      })
-      .addCase(sendAutomaticNotification.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
         state.message = action.payload;

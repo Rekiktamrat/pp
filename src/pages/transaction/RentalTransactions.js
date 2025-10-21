@@ -2,6 +2,15 @@ import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { getAllTransactions } from "../../store/transaction/transactionSlice";
 import Modal from "react-modal";
+import {
+  FiEye,
+  FiSearch,
+  FiFilter,
+  FiX,
+  FiHome,
+  FiUser,
+  FiDollarSign,
+} from "react-icons/fi";
 
 Modal.setAppElement("#root");
 
@@ -11,11 +20,20 @@ const customModalStyles = {
     left: "50%",
     right: "auto",
     bottom: "auto",
-    marginRight: "-50%",
     transform: "translate(-50%, -50%)",
-    width: "50%",
+    width: "90%",
+    maxWidth: "500px",
     maxHeight: "90vh",
     overflow: "auto",
+    borderRadius: "1rem",
+    padding: "0",
+    border: "none",
+    boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+  },
+  overlay: {
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backdropFilter: "blur(4px)",
+    zIndex: 50,
   },
 };
 
@@ -58,66 +76,94 @@ const RentalTransactions = () => {
   });
 
   return (
-    <div className="p-10 bg-gray-100 min-h-screen">
-      <h1 className="text-2xl font-bold mb-6">Rental Transactions</h1>
+    <div className="pt-24 px-6 md:px-8 pb-8 bg-gray-50 dark:bg-gray-900 min-h-screen">
+      <div className="max-w-7xl mx-auto">
+        <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-6">
+          Rental Transactions
+        </h1>
 
-      {/* Search + Price Filter */}
-      <div className="flex space-x-4 mb-4">
-        <input
-          type="text"
-          placeholder="Search by Property or Renter"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="p-2 border rounded w-1/3"
-        />
-        <select
-          value={priceFilter}
-          onChange={(e) => setPriceFilter(e.target.value)}
-          className="p-2 border rounded"
-        >
-          <option value="">All Prices</option>
-          <option value="low">Low (&lt; $500)</option>
-          <option value="medium">Medium ($500 - $1500)</option>
-          <option value="high">High (&gt; $1500)</option>
-        </select>
+        {/* Search + Price Filter */}
+        <div className="flex flex-col md:flex-row gap-4 mb-6">
+          <div className="relative flex-grow">
+            <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search by Property or Renter..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+            />
+          </div>
+          <div className="relative">
+            <FiFilter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <select
+              value={priceFilter}
+              onChange={(e) => setPriceFilter(e.target.value)}
+              className="w-full md:w-auto pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition appearance-none"
+            >
+              <option value="">All Prices</option>
+              <option value="low">Low (&lt; $500)</option>
+              <option value="medium">Medium ($500 - $1500)</option>
+              <option value="high">High (&gt; $1500)</option>
+            </select>
+          </div>
+        </div>
+
+        {loading ? (
+          <p>Loading...</p>
+        ) : error ? (
+          <p className="text-red-500">{error}</p>
+        ) : (
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                <thead className="text-xs text-gray-700 uppercase bg-gray-100 dark:bg-gray-700 dark:text-gray-300">
+                  <tr>
+                    <th scope="col" className="px-6 py-3">
+                      Property Name
+                    </th>
+                    <th scope="col" className="px-6 py-3">
+                      Renter Name
+                    </th>
+                    <th scope="col" className="px-6 py-3">
+                      Price
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-right">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredTransactions?.map((transaction) => (
+                    <tr
+                      key={transaction._id}
+                      className="bg-white dark:bg-gray-800 border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                    >
+                      <td className="px-6 py-4 font-semibold text-gray-900 dark:text-white">
+                        {transaction?.property?.title}
+                      </td>
+                      <td className="px-6 py-4">{transaction?.buyer?.name}</td>
+                      <td className="px-6 py-4">${transaction.amount}</td>
+                      <td className="px-6 py-4 text-right">
+                        <button
+                          onClick={() => {
+                            setSelectedTransaction(transaction);
+                            setIsView(true);
+                          }}
+                          className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                          aria-label="View transaction"
+                        >
+                          <FiEye className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
-
-      {loading ? (
-        <p>Loading...</p>
-      ) : error ? (
-        <p className="text-red-500">{error}</p>
-      ) : (
-        <table className="w-full bg-white shadow-md rounded-lg">
-          <thead>
-            <tr className="bg-blue-700 text-white">
-              <th className="px-4 py-2">Property Name</th>
-              <th className="px-4 py-2">Renter Name</th>
-              <th className="px-4 py-2">Price</th>
-              <th className="px-4 py-2">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredTransactions?.map((transaction) => (
-              <tr key={transaction._id}>
-                <td className="px-4 py-2">{transaction?.property?.title}</td>
-                <td className="px-4 py-2">{transaction?.buyer?.name}</td>
-                <td className="px-4 py-2">${transaction.amount}</td>
-                <td className="px-4 py-2">
-                  <button
-                    onClick={() => {
-                      setSelectedTransaction(transaction);
-                      setIsView(true);
-                    }}
-                    className="bg-blue-500 text-white px-3 py-1 rounded-lg hover:bg-blue-600"
-                  >
-                    View
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
 
       {/* View Modal */}
       <Modal
@@ -127,27 +173,44 @@ const RentalTransactions = () => {
         contentLabel="View Transaction"
       >
         {selectedTransaction && (
-          <div>
-            <h2 className="text-xl font-bold mb-4">Transaction Details</h2>
-            <p>
-              <strong>Property:</strong> {selectedTransaction?.property?.title}
-            </p>
-            <p>
-              <strong>Renter:</strong> {selectedTransaction?.buyer?.name}
-            </p>
-            <p>
-              <strong>Amount:</strong> ${selectedTransaction.amount}
-            </p>
-            <p>
-              <strong>Date:</strong> {formatDate(selectedTransaction.createdAt)}
-            </p>
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                Transaction Details
+              </h2>
+              <button
+                onClick={() => setIsView(false)}
+                className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <FiX className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+              </button>
+            </div>
 
-            <button
-              className="mt-4 bg-red-500 text-white px-4 py-2 rounded"
-              onClick={() => setIsView(false)}
-            >
-              Close
-            </button>
+            <div className="space-y-4 text-sm">
+              <div className="flex items-center gap-3">
+                <FiHome className="w-4 h-4 text-gray-500" />
+                <span className="text-gray-500 dark:text-gray-400">
+                  Property:
+                </span>
+                <span className="font-semibold text-gray-800 dark:text-white">
+                  {selectedTransaction?.property?.title}
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                <FiUser className="w-4 h-4 text-gray-500" />
+                <span className="text-gray-500 dark:text-gray-400">Renter:</span>
+                <span className="font-semibold text-gray-800 dark:text-white">
+                  {selectedTransaction?.buyer?.name}
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                <FiDollarSign className="w-4 h-4 text-gray-500" />
+                <span className="text-gray-500 dark:text-gray-400">Amount:</span>
+                <span className="font-semibold text-gray-800 dark:text-white">
+                  ${selectedTransaction.amount}
+                </span>
+              </div>
+            </div>
           </div>
         )}
       </Modal>
@@ -156,3 +219,4 @@ const RentalTransactions = () => {
 };
 
 export default RentalTransactions;
+

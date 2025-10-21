@@ -77,6 +77,7 @@ const PropertyViewModal = ({ property, onClose }) => {
           <span className="ml-4 font-semibold text-gray-600">Phone:</span>
           <span className="ml-2">{property?.owner?.phone || "-"}</span>
         </div>
+        
 
         {/* Thumbnails */}
         {thumbnails.length > 0 && (
@@ -91,9 +92,24 @@ const PropertyViewModal = ({ property, onClose }) => {
                   className="w-20 h-20 object-cover rounded border"
                 />
               ))}
+              
             </div>
           </div>
         )}
+        {property.history && property.history.length > 0 && (
+            <div className="mt-4">
+              <h3 className="text-md font-bold mb-2">History</h3>
+              <ul className="list-disc list-inside">
+                {property.history.map((entry, index) => (
+                  <li key={index} className="mb-1">
+                    <span className="font-semibold">{entry.status}</span>:{" "}
+                    {entry.message} (
+                    {new Date(entry.updatedAt).toLocaleString()})
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
       </div>
     </div>
   );

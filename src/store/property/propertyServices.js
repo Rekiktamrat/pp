@@ -2,7 +2,18 @@ import { base_url } from "../../api/axiosConfig";
 import axios from "axios";
 
 const getAllProperties = async () => {
-  const response = await axios.get(`${base_url}/property/all-properties`);
+  const userData = await localStorage.getItem("admin");
+  const getTokenFromLocalStorage = userData ? JSON.parse(userData) : null;
+
+  const headers = {
+    Authorization: `Bearer ${
+      getTokenFromLocalStorage ? getTokenFromLocalStorage.token : ""
+    }`,
+  };
+  const response = await axios.get(`${base_url}/property/all-properties`, {
+    headers,
+    withCredentials: true,
+  });
   return response.data;
 };
 

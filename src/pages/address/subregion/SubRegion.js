@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Modal from "react-modal";
-import { FiPlus, FiEdit2, FiTrash2 } from "react-icons/fi";
+import { FiPlus, FiEdit2, FiTrash2, FiMapPin } from "react-icons/fi";
 import AddSubRegion from "./AddSubRegion";
 import EditSubRegion from "./EditSubRegion";
 import DeleteSubRegion from "./DeleteSubRegion";
@@ -15,11 +15,20 @@ const customModalStyles = {
     left: "50%",
     right: "auto",
     bottom: "auto",
-    marginRight: "-50%",
     transform: "translate(-50%, -50%)",
-    width: "50%",
+    width: "90%",
+    maxWidth: "500px",
     maxHeight: "90vh",
     overflow: "auto",
+    borderRadius: "1rem",
+    padding: "0",
+    border: "none",
+    boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+  },
+  overlay: {
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backdropFilter: "blur(4px)",
+    zIndex: 50,
   },
 };
 const SubRegion = () => {
@@ -38,13 +47,14 @@ const SubRegion = () => {
 
   // Remove grouping by country and region
   return (
-    <div className="p-6 bg-gray-100 dark:bg-gray-800 rounded-lg shadow-md">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold text-gray-800 dark:text-white">SubRegions</h1>
+    <div className="pt-24 px-6 md:px-8 pb-8 bg-gray-50 dark:bg-gray-900 min-h-screen">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
+          SubRegion Management
+        </h1>
         <div className="flex gap-3">
           <button
-            className="flex items-center px-4 py-2 text-sm bg-blue-600 text-white rounded-lg 
-                     hover:bg-blue-700 transition-colors duration-200"
+            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-300"
             onClick={() => setIsAdd(true)}
           >
             <FiPlus className="mr-1" />
@@ -52,8 +62,7 @@ const SubRegion = () => {
           </button>
           {subRegions?.length > 0 && (
             <button
-              className="flex items-center px-4 py-2 text-sm bg-red-600 text-white rounded-lg 
-                       hover:bg-red-700 transition-colors duration-200"
+              className="flex items-center justify-center gap-2 px-4 py-2.5 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all duration-300"
               onClick={() => setIsDeleteAll(true)}
             >
               <FiTrash2 className="mr-1" />
@@ -66,15 +75,25 @@ const SubRegion = () => {
       {subRegions?.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {subRegions.map((subRegion) => (
-            <div key={subRegion.id} className="bg-white dark:bg-gray-700 rounded-lg shadow hover:shadow-lg transition-shadow duration-200 p-4 relative">
-              <h3 className="text-md font-medium text-gray-800 dark:text-white truncate">{subRegion.subregion_name}</h3>
-              <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <div
+              key={subRegion.id}
+              className="group relative bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+            >
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-white truncate">
+                {subRegion.subregion_name}
+              </h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1.5 mt-1">
+                <FiMapPin className="w-3 h-3" />
+                {subRegion.region?.region_name || "Uncategorized"}
+              </p>
+              <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                 <button
                   onClick={() => {
                     setModifySubRegion(subRegion);
                     setIsEdit(true);
                   }}
-                  className="p-1 bg-green-600 text-white rounded-full hover:bg-green-700 transition-colors"
+                  className="p-2 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 hover:scale-110 transition-transform"
+                  aria-label="Edit subregion"
                 >
                   <FiEdit2 size={16} />
                 </button>
@@ -83,7 +102,8 @@ const SubRegion = () => {
                     setModifySubRegion(subRegion);
                     setIsDelete(true);
                   }}
-                  className="p-1 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors"
+                  className="p-2 rounded-full bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400 hover:scale-110 transition-transform"
+                  aria-label="Delete subregion"
                 >
                   <FiTrash2 size={16} />
                 </button>
@@ -92,9 +112,16 @@ const SubRegion = () => {
           ))}
         </div>
       ) : (
-        <div className="text-center py-12">
-          <p className="text-gray-500 dark:text-gray-400">No subregions found.</p>
-          <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">Click the "Add SubRegion" button to create one.</p>
+        <div className="text-center py-20 mt-8 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl">
+          <div className="text-6xl text-gray-300 dark:text-gray-600 mb-4">
+            📍
+          </div>
+          <p className="text-gray-500 dark:text-gray-400 text-lg">
+            No subregions found.
+          </p>
+          <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">
+            Click the "Add SubRegion" button to create one.
+          </p>
         </div>
       )}
 
@@ -111,7 +138,6 @@ const SubRegion = () => {
         <DeleteSubRegion setIsDelete={setIsDelete} selectedSubRegion={modifySubRegion} />
       </Modal>
 
-    
     </div>
   );
 };

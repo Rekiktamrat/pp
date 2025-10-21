@@ -1,22 +1,19 @@
-import React from "react";
-import Sidebar from "../components/Sidebar"; // Sidebar component
-import Header from "../components/Header"; // Header component
-import { Outlet } from "react-router-dom"; // For rendering child routes
+import React, { useState } from "react";
+import Sidebar from "../components/Sidebar";
+import Header from "../components/Header";
+import { Outlet } from "react-router-dom";
 
 const AdminLayout = () => {
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const [isSidebarCollapsed, setSidebarCollapsed] = useState(false);
+
   return (
-    <div className="flex h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-200">
-      {/* Sidebar */}
-      <Sidebar />
-
-      {/* Main Content Area */}
-      <div className="flex flex-col flex-grow">
-        {/* Header */}
-        <Header />
-
-        {/* Main Content */}
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-200">
+      <Sidebar isSidebarOpen={isSidebarOpen} setSidebarOpen={setSidebarOpen} collapsed={isSidebarCollapsed} setCollapsed={setSidebarCollapsed} />
+      <div className={`flex flex-col flex-grow transition-all duration-300 ${isSidebarCollapsed ? 'md:pl-20' : 'md:pl-64'}`}>
+        <Header setSidebarOpen={setSidebarOpen} />
         <main className="flex-grow p-6 overflow-auto">
-          <Outlet /> {/* This renders the current child route content */}
+          <Outlet />
         </main>
       </div>
     </div>

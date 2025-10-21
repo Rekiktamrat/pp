@@ -1,11 +1,8 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
+import { editPropertytype } from "../../../store/PropertyType/propertytypeSlice";
 
-const EditPropertyType = ({
-  setIsEdit,
-  selectedPropertyType,
-  updateProperty,
-}) => {
+const EditPropertyType = ({ setIsEdit, selectedPropertyType }) => {
   const dispatch = useDispatch();
   // Use selectedPropertyType to initialize state
   const [propertyTypeDetails, setPropertyTypeDetails] = useState({
@@ -27,8 +24,18 @@ const EditPropertyType = ({
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    console.log("Updated Property Type Details:", propertyTypeDetails);
+
+    console.log(selectedPropertyType._id);
+
+    const data = {
+      id: selectedPropertyType._id,
+      data: propertyTypeDetails,
+    };
+
     // Call parent function to update the property type in mock state
-    dispatch(updateProperty(selectedPropertyType._id, propertyTypeDetails))
+    dispatch(editPropertytype(data))
       .unwrap()
       .then(() => {
         setTimeout(() => {

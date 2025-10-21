@@ -1,8 +1,14 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
+import {
+  FiUser,
+  FiMail,
+  FiLock,
+  FiLogIn,
+  FiAlertTriangle,
+} from "react-icons/fi";
 import { adminRegister } from "../../store/auth/authSlices";
-import axios from "axios";
 
 const Signup = () => {
   const dispatch = useDispatch();
@@ -49,87 +55,91 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen flex">
-      {/* Left section: Illustration/Message */}
-      <div className="w-1/2 bg-gray-100 flex justify-center items-center p-8">
-        <div>
-          <h1 className="text-3xl font-semibold text-purple-600 mb-4">
-            Admin sign up
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col justify-center items-center p-4">
+      <div className="w-full max-w-md">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            Create an Admin Account
           </h1>
-          <p className="text-gray-500"></p>
+          <p className="text-gray-500 dark:text-gray-400 mt-2">
+            Get started by creating a new account.
+          </p>
         </div>
-      </div>
 
-      {/* Right section: Signup Form */}
-      <div className="w-1/2 flex flex-col justify-center items-center bg-white p-8">
-        <div className="w-full max-w-md">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">Sign up</h2>
-
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 p-8">
           <form onSubmit={handleSignup} className="space-y-4">
-            <div>
-              <label className="block text-gray-700">Full Name</label>
+            {error && (
+              <div className="bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-500/30 p-3 rounded-lg flex items-center gap-3">
+                <FiAlertTriangle className="w-5 h-5" />
+                <span>{error}</span>
+              </div>
+            )}
+            {success && (
+              <p className="text-green-500 dark:text-green-400">{success}</p>
+            )}
+
+            <div className="relative">
+              <FiUser className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
                 onChange={(e) => setName(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600"
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
                 placeholder="Full name"
                 required
               />
             </div>
 
-            <div>
-              <label className="block text-gray-700">Email Address</label>
+            <div className="relative">
+              <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600"
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
                 placeholder="Email Address"
                 required
               />
             </div>
 
-            <div>
-              <label className="block text-gray-700">Password</label>
+            <div className="relative">
+              <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600"
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
                 placeholder="Password"
                 required
               />
             </div>
 
-            <div>
-              <label className="block text-gray-700">Confirm Password</label>
+            <div className="relative">
+              <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600"
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
                 placeholder="Confirm Password"
                 required
               />
             </div>
 
-            {error && <p className="text-red-500">{error}</p>}
-            {success && <p className="text-green-500">{success}</p>}
-
             <button
               type="submit"
-              className="w-full bg-purple-600 text-white py-2 rounded-md hover:bg-purple-700 transition duration-200"
+              className="w-full flex items-center justify-center gap-2 bg-gray-900 dark:bg-blue-600 text-white font-semibold py-2.5 rounded-lg hover:bg-gray-800 dark:hover:bg-blue-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-blue-500 focus:ring-offset-2"
             >
+              <FiLogIn />
               Create Account
             </button>
           </form>
 
-          <div className="mt-4 text-center">
+          <div className="mt-6 text-center">
             <p className="text-sm text-gray-500">
               Already a user?{" "}
               <button
                 onClick={redirectToLogin} // Navigate to the login page with Manager mode
-                className="text-purple-600 hover:underline"
+                className="font-semibold text-blue-600 hover:underline"
               >
                 Sign in
               </button>

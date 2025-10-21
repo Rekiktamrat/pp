@@ -5,7 +5,7 @@ const ViewPropertyType = ({ setIsView, selectedProperty }) => {
     <div>
       <h2 className="text-lg font-bold mb-4">Property Details</h2>
       <div className="mb-4">
-        <strong>ID:</strong> {selectedProperty?.id}
+        <strong>ID:</strong> {selectedProperty?._id}
       </div>
       <div className="mb-4">
         <strong>Name:</strong> {selectedProperty?.name}
@@ -20,6 +20,10 @@ const ViewPropertyType = ({ setIsView, selectedProperty }) => {
               </div>
               <div>
                 <strong>Field Type:</strong> {field.type}
+              </div>
+
+              <div>
+                <strong>Field Required:</strong> {field.required ? "Yes" : "No"}
               </div>
               {/* <div>
                 <strong>Created At:</strong>{" "}

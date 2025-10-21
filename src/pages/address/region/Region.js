@@ -8,15 +8,24 @@ import DeleteRegion from "./DeleteRegion";
 import { getAllRegions } from "../../../store/address/region/regionSlice";
 const customModalStyles = {
   content: {
-    top: "50%",
-    left: "50%",
-    right: "auto",
-    bottom: "auto",
-    marginRight: "-50%",
-    transform: "translate(-50%, -50%)",
-    width: "50%",
+    top: "50%", // Center the modal
+    left: "50%", // Center the modal
+    right: "auto", // Reset right
+    bottom: "auto", // Reset bottom
+    transform: "translate(-50%, -50%)", // Center the modal
+    width: "90%", // Responsive width
+    maxWidth: "500px", // Max width for larger screens
     maxHeight: "90vh",
     overflow: "auto",
+    borderRadius: "1rem", // rounded-xl
+    padding: "0", // Padding will be handled by the inner component
+    border: "none",
+    boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+  },
+  overlay: {
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backdropFilter: "blur(4px)",
+    zIndex: 50,
   },
 };
 
@@ -35,7 +44,7 @@ const Region = () => {
   const { regions } = useSelector((state) => state.regions);
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="pt-24 px-6 md:px-8 pb-8 bg-gray-50 dark:bg-gray-900 min-h-screen">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
           Region Management
@@ -64,8 +73,8 @@ const Region = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {regions.map((region) => (
             <div
-              key={region._id}
-              className="relative bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow duration-200"
+              key={region.id}
+              className="group relative bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
             >
               <div className="flex justify-between items-center">
                 <div>
@@ -81,16 +90,14 @@ const Region = () => {
                 </div>
 
                 {/* Hover actions */}
-                <div
-                  className="absolute top-2 right-2 flex space-x-1 opacity-0 group-hover:opacity-100 
-                              transition-opacity duration-200"
-                >
+                <div className="absolute top-3 right-3 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <button
                     onClick={() => {
                       setModifyRegion(region);
                       setIsEdit(true);
                     }}
-                    className="p-2 bg-green-600 text-white rounded-full shadow-md hover:bg-green-700"
+                    className="p-2 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 hover:scale-110 transition-transform"
+                    aria-label="Edit region"
                   >
                     <FiEdit2 size={16} />
                   </button>
@@ -99,7 +106,8 @@ const Region = () => {
                       setModifyRegion(region);
                       setIsDelete(true);
                     }}
-                    className="p-2 bg-red-600 text-white rounded-full shadow-md hover:bg-red-700"
+                    className="p-2 rounded-full bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400 hover:scale-110 transition-transform"
+                    aria-label="Delete region"
                   >
                     <FiTrash2 size={16} />
                   </button>
@@ -109,7 +117,10 @@ const Region = () => {
           ))}
         </div>
       ) : (
-        <div className="text-center py-12">
+        <div className="text-center py-20 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl">
+          <div className="text-6xl text-gray-300 dark:text-gray-600 mb-4">
+            🗺️
+          </div>
           <p className="text-gray-500 dark:text-gray-400 text-lg">
             No regions found.
           </p>
